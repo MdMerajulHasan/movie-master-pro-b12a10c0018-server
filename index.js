@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -37,11 +37,22 @@ async function run() {
     const movieCollection = db.collection("movies");
 
     // apis
-    app.get('/movies',async (req, res)=>{
-        const cursor = movieCollection.find({});
-        const result = await cursor.toArray();
-        res.send(result);
-    })
+    app.get("/movies", async (req, res) => {
+      const cursor = movieCollection.find({});
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.get("/movies/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await movieCollection.findOne(query);
+      res.send(result);
+    });
+    app.post("/movies/add", async (req, res) => {
+      const newMovie = req.body;
+      const result = await movieCollection.insertOne(newMovie);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
