@@ -50,11 +50,19 @@ async function run() {
       const result = await movieCollection.findOne(query);
       res.send(result);
     });
+    // api to get my-collection
+    app.get("/movies/my-collection", (req, res) => {
+
+    });
     // api to add a new movie data
     app.post("/movies/add", async (req, res) => {
       const newMovie = req.body;
       const result = await movieCollection.insertOne(newMovie);
       res.send(result);
+    });
+    // api to update movie data
+    app.patch("/movies/update/:id", async (req, res) => {
+        
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
