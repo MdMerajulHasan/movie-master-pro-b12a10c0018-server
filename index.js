@@ -37,17 +37,20 @@ async function run() {
     const movieCollection = db.collection("movies");
 
     // apis
+    // api to get all movies
     app.get("/movies", async (req, res) => {
       const cursor = movieCollection.find({});
       const result = await cursor.toArray();
       res.send(result);
     });
+    // api to get movie data by id
     app.get("/movies/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await movieCollection.findOne(query);
       res.send(result);
     });
+    // api to add a new movie data
     app.post("/movies/add", async (req, res) => {
       const newMovie = req.body;
       const result = await movieCollection.insertOne(newMovie);
