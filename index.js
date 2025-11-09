@@ -36,6 +36,12 @@ async function run() {
     const db = client.db("movieMasterPro");
     const movieCollection = db.collection("movies");
 
+    // apis
+    app.get('/movies',async (req, res)=>{
+        const cursor = movieCollection.find({});
+        const result = await cursor.toArray();
+        res.send(result);
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -48,8 +54,6 @@ async function run() {
 //calling the run function
 run().catch(console.dir);
 // ---------------------------------------------------------------
-
-// apis
 
 app.listen(port, () => {
   console.log("movie master server is running on port: ", port);
