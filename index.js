@@ -35,11 +35,24 @@ async function run() {
     // Send a ping to confirm a successful connection
     const db = client.db("movieMasterPro");
     const movieCollection = db.collection("movies");
+    const movieUserCollection = db.collection("movieUserDB");
 
     // apis
     // api to get all movies
     app.get("/movies", async (req, res) => {
       const cursor = movieCollection.find({});
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // api to get top 5 movies
+    app.get("/movies/top-rated", async (req, res) => {
+      const cursor = movieCollection.find({}).sort({ rating: -1 }).limit(5);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // api to get user data
+    app.get("/users", async (req, res) => {
+      const cursor = movieUserCollection.find({});
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -51,19 +64,21 @@ async function run() {
       res.send(result);
     });
     // api to get my-collection
-    app.get("/movies/my-collection", (req, res) => {
-
-    });
+    app.get("/movies/my-collection", (req, res) => {});
     // api to add a new movie data
     app.post("/movies/add", async (req, res) => {
       const newMovie = req.body;
       const result = await movieCollection.insertOne(newMovie);
       res.send(result);
     });
-    // api to update movie data
-    app.patch("/movies/update/:id", async (req, res) => {
-        
+    // api to add new user data
+    app.post("/users/add", async (req, res) => {
+      const newMovie = req.body;
+      const result = await movieUserCollection.insertOne(newMovie);
+      res.send(result);
     });
+    // api to update movie data
+    app.patch("/movies/update/:id", async (req, res) => {});
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
