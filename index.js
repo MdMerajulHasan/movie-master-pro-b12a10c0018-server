@@ -50,6 +50,15 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    // api to get recently added movies
+    app.get("/movies/recent", async (req, res) => {
+      const cursor = movieCollection
+        .find({})
+        .sort({ releaseYear: -1 })
+        .limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
     // api to get user data
     app.get("/users", async (req, res) => {
       const cursor = movieUserCollection.find({});
