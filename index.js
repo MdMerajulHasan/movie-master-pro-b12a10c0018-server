@@ -40,7 +40,12 @@ async function run() {
     // apis
     // api to get all movies
     app.get("/movies", async (req, res) => {
-      const cursor = movieCollection.find({});
+      const min = Number(req.query.min);
+      const query = {};
+      if (min) {
+        query.rating = { $gte: min, $lte: 10 };
+      }
+      const cursor = movieCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -65,6 +70,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    // api to get my-collection
+    app.get("/movies/my-collection/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { addedBy: email };
+      const result = await movieCollection.find(query).toArray();
+      res.send(result);
+    });
     // api to get movie data by id
     app.get("/movies/:id", async (req, res) => {
       const id = req.params.id;
@@ -72,10 +84,16 @@ async function run() {
       const result = await movieCollection.findOne(query);
       res.send(result);
     });
-    // api to get my-collection
-    app.get("/movies/my-collection", (req, res) => {});
+
     // api to add a new movie data
     app.post("/movies/add", async (req, res) => {
+      const email = req.body.addedBy;
+      if (!email) {
+        return res.status(400).send({
+          success: false,
+          message: "You Are Not Login User!",
+        });
+      }
       const newMovie = req.body;
       const result = await movieCollection.insertOne(newMovie);
       res.send(result);
@@ -87,7 +105,20 @@ async function run() {
       res.send(result);
     });
     // api to update movie data
-    app.patch("/movies/update/:id", async (req, res) => {});
+    app.patch("/movies/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedDocument = { $set: req.body };
+      const result = await movieCollection.updateOne(query, updatedDocument);
+      res.send(result);
+    });
+    // api to delete a movie
+    app.delete("/movies/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await movieCollection.deleteOne(query);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
