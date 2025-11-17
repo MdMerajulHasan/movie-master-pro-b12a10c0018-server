@@ -86,6 +86,15 @@ async function run() {
       res.send(result);
     });
 
+    // api to get watch list data
+    app.get("/watch-list/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { played: email };
+      const cursor = watchedCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // api to add watch list
     app.post("/movies/watch-list", async (req, res) => {
       const watchedMovie = req.body;
