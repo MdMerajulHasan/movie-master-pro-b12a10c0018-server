@@ -36,6 +36,7 @@ async function run() {
     const db = client.db("movieMasterPro");
     const movieCollection = db.collection("movies");
     const movieUserCollection = db.collection("movieUserDB");
+    const watchedCollection = db.collection("watchedDB");
 
     // apis
     // api to get all movies
@@ -83,6 +84,18 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await movieCollection.findOne(query);
       res.send(result);
+    });
+
+    // api to add watch list
+    app.post("/movies/watch-list", async (req, res) => {
+      const watchedMovie = req.body;
+      const query = { movie: watchedMovie.movie, played: watchedMovie.played };
+      const findWatched = await watchedCollection.findOne(query);
+      if (!findWatched) {
+        const result = await watchedCollection.insertOne(watchedMovie);
+        return res.send(result);
+      }
+      return res.send("Movie is already in watch list!");
     });
 
     // api to add a new movie data
