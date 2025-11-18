@@ -3,11 +3,34 @@ const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
+const admin = require("firebase-admin");
 const port = process.env.PORT || 3000;
+
+const serviceAccount = require("./movie-master-pro-firebase-admin-sdk.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 // middle wires
 app.use(cors());
 app.use(express.json());
+
+const verifyToken = async (req, res, next) => {
+  if (!req.headers.authorization) {
+    // token not added so return
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+  try {
+    const userInfo = await admin.auth().verifyIdToken(token);
+    req.token_owner = userInfo.email;
+    next();
+  } catch {}
+};
 // -------------------------------------------------------
 
 // mongodb
@@ -127,7 +150,12 @@ async function run() {
       res.send(result);
     });
     // api to update movie data
-    app.patch("/movies/update/:id", async (req, res) => {
+    app.patch("/movies/update/:id", verifyToken, async (req, res) => {
+      const email = req.body.addedBy;
+
+      if (email !== req.token_owner) {
+        return res.status(403).send({ message: "Forbidden Access!" });
+      }
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const updatedDocument = { $set: req.body };
