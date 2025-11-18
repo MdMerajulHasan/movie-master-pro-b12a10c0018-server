@@ -131,20 +131,17 @@ async function run() {
     });
 
     // api to add a new movie data
-    app.post("/movies/add", async (req, res) => {
+    app.post("/movies/add", verifyToken, async (req, res) => {
       const email = req.body.addedBy;
-      if (!email) {
-        return res.status(400).send({
-          success: false,
-          message: "You Are Not Login User!",
-        });
+      if (email !== req.token_owner) {
+        return res.status(403).send({ message: "Forbidden Access" });
       }
       const newMovie = req.body;
       const result = await movieCollection.insertOne(newMovie);
       res.send(result);
     });
     // api to add new user data
-    app.post("/users/add", async (req, res) => {
+    app.post("/users/add", verifyToken, async (req, res) => {
       const newMovie = req.body;
       const result = await movieUserCollection.insertOne(newMovie);
       res.send(result);
